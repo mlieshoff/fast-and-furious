@@ -1,0 +1,21 @@
+<project name="sample" default="backup">
+    <!-- import core stuff -->
+    <import file="${basedir}/backup-core.xml"/>
+
+    <!-- your backup store folder -->
+    <property name="backup.save.dir" value="/home/micha/tmp/backup"/>
+
+    <!-- your cipher key, at least 4 characters -->
+    <property name="cipher.key" value="BlaBlubBlubber"/>
+
+    <!-- target which starts the backup process -->
+    <target name="backup" depends="init" description="Starts backup process.">
+    	<backup name="mybackup" dir="${user.home}/myfolder" />
+    </target>
+
+    <!-- target which starts the backdown process -->
+    <target name="backdown" depends="init" description="Starts backdown process.">
+    	<backdown name="mybackup" />
+    </target>
+
+</project>

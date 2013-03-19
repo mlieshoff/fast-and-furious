@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="backup" default="compile" basedir=".">
+    <property name="dir.src" value="./src" />
+    <property name="dir.tmp" value="./tmp" />
+    <property name="dir.classes" value="./bin/classes" />
+    <property name="zip.release" value="${dir.tmp}/${ant.project.name}-release.jar" />
+
+    <path id="cp">
+        <pathelement location="${dir.classes}" />
+    </path>
+
+    <target name="info" description="Info">
+        <echo message="dir.tmp          : ${dir.tmp}" />
+        <echo message="dir.src          : ${dir.src}" />
+        <echo message="dir.classes      : ${dir.classes}" />
+    </target>
+
+    <target name="clean" depends="info" description="Cleans">
+        <delete dir="${dir.tmp}" />
+        <mkdir dir="${dir.classes}" />
+    </target>
+
+    <target name="compile" depends="clean" description="Compiles">
+        <javac fork="true" classpathref="cp" debug="on" destdir="${dir.classes}"
+               srcdir="${dir.src}" sourcepath="${dir.src}" verbose="no" deprecation="no"
+               target="1.7" failonerror="true" memoryMaximumSize="256m">
+        </javac>
+    </target>
+
+    <target name="release" depends="compile" description="Makes a release">
+    	<delete file="${zip.release}" failonerror="false"/>
+        <zip destfile="${zip.release}">
+            <zipfileset dir="sample" prefix="${ant.project.name}">
+                <include name="**/*" />
+            </zipfileset>
+            <zipfileset dir="conf" prefix="${ant.project.name}">
+                <include name="**/*" />
+            </zipfileset>
+            <zipfileset dir="bin" prefix="${ant.project.name}">
+                <include name="**/*" />
+            </zipfileset>
+        </zip>
+    	<unzip src="${zip.release}" dest="${dir.tmp}/release" />
+    </target>
+
+</project>
