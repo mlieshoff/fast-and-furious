@@ -31,20 +31,28 @@
             <echo message="    excludes       : @{excludes}" />
             <echo message="    includes       : @{includes}" />
             <echo message="    backup.save.dir: ${backup.save.dir}" />
-    	    <delete file="${backup.save.dir}/@{name}.zip" />
-    	    <delete file="${tmp.dir}/@{name}.zip" />
-    	    <zip destfile="${tmp.dir}/@{name}.zip" basedir="@{dir}" includes="@{includes}" excludes="@{excludes}" />
-            <echo message="done backup of [@{name}]" />
-            <echo message="ciphering..." />
-                <java classpath="classes" classname="org.mili.cipher.FileCipher">
-                <arg value="${cipher.key}"/>
-                <arg value="${backup.save.dir}"/>
-                <arg value="code"/>
-                <arg value="${tmp.dir}/@{name}.zip"/>
-        		<classpath>
-                    <pathelement path="bin"/>
-                </classpath>
-            </java>
+        	<if>
+        	    <available file="@{dir}" type="dir" property="local.lib.present"/>
+            	<then>
+                    <delete file="${backup.save.dir}/@{name}.zip" />
+                    <delete file="${tmp.dir}/@{name}.zip" />
+                    <zip destfile="${tmp.dir}/@{name}.zip" basedir="@{dir}" includes="@{includes}" excludes="@{excludes}" />
+                    <echo message="done backup of [@{name}]" />
+                    <echo message="ciphering..." />
+                        <java classpath="classes" classname="org.mili.cipher.FileCipher">
+                        <arg value="${cipher.key}"/>
+                        <arg value="${backup.save.dir}"/>
+                        <arg value="code"/>
+                        <arg value="${tmp.dir}/@{name}.zip"/>
+                        <classpath>
+                            <pathelement path="bin"/>
+                        </classpath>
+                    </java>
+            	 </then>
+        	     <else>
+        	         <echo message="ignore @{dir}" />
+        	     </else>
+        	</if>
             <echo message="" />
         </sequential>
     </macrodef>
