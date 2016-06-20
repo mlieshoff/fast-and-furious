@@ -1,10 +1,12 @@
 <project name="backup-core">
 
-   <taskdef resource="net/sf/antcontrib/antcontrib.properties">
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties">
         <classpath>
             <pathelement location="/usr/share/java/ant-contrib-1.0b3.jar" />
         </classpath>
     </taskdef>
+
+    <taskdef name="checksum" classname="org.mili.cipher.Checksum" classpath="classes"/>
 
     <property name="tmp.dir" value="${java.io.tmpdir}/backup"/>
 
@@ -19,7 +21,7 @@
         <mkdir dir="${backup.save.dir}"/>
         <echo message="fast-and-furious initialized." />
 	</target>
-	
+
     <macrodef name="backup">
         <attribute name="name" />
         <attribute name="dir" />
@@ -34,20 +36,27 @@
         	<if>
         	    <available file="@{dir}" type="dir" property="local.lib.present"/>
             	<then>
-                    <delete file="${backup.save.dir}/@{name}.zip" />
-                    <delete file="${tmp.dir}/@{name}.zip" />
-                    <zip destfile="${tmp.dir}/@{name}.zip" basedir="@{dir}" includes="@{includes}" excludes="@{excludes}" />
-                    <echo message="done backup of [@{name}]" />
-                    <echo message="ciphering..." />
-                        <java classpath="classes" classname="org.mili.cipher.FileCipher">
-                        <arg value="${cipher.key}"/>
-                        <arg value="${backup.save.dir}"/>
-                        <arg value="code"/>
-                        <arg value="${tmp.dir}/@{name}.zip"/>
-                        <classpath>
-                            <pathelement path="bin"/>
-                        </classpath>
-                    </java>
+                    <checksum backUpDir="${backup.save.dir}" filename="@{name}.zip" baseDir="@{dir}" resultProperty="checksum" includes="@{includes}" excludes="@{excludes}"/>
+                    <if>
+                        <equals arg1="${checksum}" arg2="1" />
+                        <then>
+                            <echo message="checksum check: needs update" />
+                            <delete file="${backup.save.dir}/@{name}.zip" />
+                            <delete file="${tmp.dir}/@{name}.zip" />
+                            <zip destfile="${tmp.dir}/@{name}.zip" basedir="@{dir}" includes="@{includes}" excludes="@{excludes}" />
+                            <echo message="done backup of [@{name}]" />
+                            <echo message="ciphering..." />
+                            <java classpath="classes" classname="org.mili.cipher.FileCipher">
+                                <arg value="${cipher.key}"/>
+                                <arg value="${backup.save.dir}"/>
+                                <arg value="code"/>
+                                <arg value="${tmp.dir}/@{name}.zip"/>
+                            </java>
+                        </then>
+                        <else>
+                            <echo message="checksum check: up-to-date" />
+                        </else>
+                    </if>
             	 </then>
         	     <else>
         	         <echo message="ignore @{dir}" />
@@ -85,7 +94,7 @@
          <echo>ZIP files found: ${list}</echo>
          <foreach list="${list}" target="backdown0" param="file" trim="yes" />
      </target>
-	
+
      <target name="backdown0">
      	<backdown name="${file}"/>
      </target>
