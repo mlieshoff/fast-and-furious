@@ -43,4 +43,7 @@
     	<unzip src="${zip.release}" dest="${dir.tmp}/release" />
     </target>
 
+    <target name="test" depends="compile" description="Tests the project">
+    </target>
+
 </project>
