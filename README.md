@@ -2,6 +2,10 @@
 
 Backup system which is able to cipher and decipher backup files automatically with lightweight environment.
 
+## CI
+
+https://travis-ci.org/mlieshoff/fast-and-furious
+
 ## What is needed?
 
   * Java 7
