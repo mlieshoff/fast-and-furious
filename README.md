@@ -21,7 +21,7 @@ fast-and-furious works supports creating backups and restoring backups.
 Backup files will be zipped automatically in "${java.io.tmpdir}/backup" directory and ciphered with DES encryption in "backup.save.dir" directory. This directory can by any kind of directory, perhaps a cloud folder or something else.
 
 <code>
-    <property name="backup.save.dir" value="/home/user/Ubuntu One/backups"/>
+    <!property name="backup.save.dir" value="/home/user/Ubuntu One/backups"/!>
 </code>
 
 ### Restoring backups (target backdown)
