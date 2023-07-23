@@ -1,0 +1,12 @@
+<project name="backup-dev">
+
+    <import file="${basedir}/backup-core.xml"/>
+
+    <property name="excludes.svn" value="**/.svn/**"/>
+    <property name="excludes.eclipse" value="**/.settings/**,**/.*"/>
+    <property name="excludes.idea" value="**/out/**,**/*.iml,**/*.ipr,**/*.iws,**/.idea/**"/>
+    <property name="excludes.maven" value="**/target/**"/>
+    <property name="excludes.tmp" value="**/tmp/**,**/*.log,**/*.out"/>
+    <property name="excludes.dev" value="${excludes.svn},${excludes.eclipse},${excludes.idea},${excludes.maven},${excludes.tmp}"/>
+	
+</project>

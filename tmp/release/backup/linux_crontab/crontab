@@ -1,0 +1,1 @@
+0 17 * * * user /home/user/backup/backup.sh >/tmp/backup.log

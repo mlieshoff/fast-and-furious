@@ -1,0 +1,102 @@
+<project name="backup-core">
+
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties">
+        <classpath>
+            <pathelement location="/usr/share/java/ant-contrib-1.0b3.jar" />
+        </classpath>
+    </taskdef>
+
+    <taskdef name="checksum" classname="org.mili.cipher.Checksum" classpath="classes"/>
+
+    <property name="tmp.dir" value="${java.io.tmpdir}/backup"/>
+
+    <echo message="BACKUP" />
+    <echo message="    basedir        : ${basedir}" />
+    <echo message="    user.home      : ${user.home}" />
+
+	<target name="init">
+        <echo message="init fast-and-furious..." />
+        <echo message="    backup.save.dir: ${backup.save.dir}" />
+		<mkdir dir="${tmp.dir}"/>
+        <mkdir dir="${backup.save.dir}"/>
+        <echo message="fast-and-furious initialized." />
+	</target>
+
+    <macrodef name="backup">
+        <attribute name="name" />
+        <attribute name="dir" />
+        <attribute name="excludes" default="" />
+        <attribute name="includes" default="**/*" />
+        <sequential>
+            <echo message="backup [@{name}]" />
+            <echo message="    dir            : @{dir}" />
+            <echo message="    excludes       : @{excludes}" />
+            <echo message="    includes       : @{includes}" />
+            <echo message="    backup.save.dir: ${backup.save.dir}" />
+        	<if>
+        	    <available file="@{dir}" type="dir" property="local.lib.present"/>
+            	<then>
+                    <checksum backUpDir="${backup.save.dir}" filename="@{name}.zip" baseDir="@{dir}" resultProperty="checksum" includes="@{includes}" excludes="@{excludes}"/>
+                    <if>
+                        <equals arg1="${checksum}" arg2="1" />
+                        <then>
+                            <echo message="checksum check: needs update" />
+                            <delete file="${backup.save.dir}/@{name}.zip" />
+                            <delete file="${tmp.dir}/@{name}.zip" />
+                            <zip destfile="${tmp.dir}/@{name}.zip" basedir="@{dir}" includes="@{includes}" excludes="@{excludes}" />
+                            <echo message="done backup of [@{name}]" />
+                            <echo message="ciphering..." />
+                            <java classpath="classes" classname="org.mili.cipher.FileCipher">
+                                <arg value="${cipher.key}"/>
+                                <arg value="${backup.save.dir}"/>
+                                <arg value="code"/>
+                                <arg value="${tmp.dir}/@{name}.zip"/>
+                            </java>
+                        </then>
+                        <else>
+                            <echo message="checksum check: up-to-date" />
+                        </else>
+                    </if>
+            	 </then>
+        	     <else>
+        	         <echo message="ignore @{dir}" />
+        	     </else>
+        	</if>
+            <echo message="" />
+        </sequential>
+    </macrodef>
+
+    <macrodef name="backdown">
+        <attribute name="name" />
+        <sequential>
+        	<basename property="filename" file="@{name}"/>
+            <echo message="backdown [${filename}]" />
+            <delete file="${tmp.dir}/${filename}" />
+            <echo message="deciphering..." />
+        	<java classpath="classes" classname="org.mili.cipher.FileCipher">
+        	    <arg value="${cipher.key}"/>
+                <arg value="${tmp.dir}"/>
+                <arg value="decode"/>
+                <arg value="${backup.save.dir}/${filename}"/>
+        		<classpath>
+        		    <pathelement path="bin"/>
+                </classpath>
+            </java>
+            <echo message="" />
+        </sequential>
+    </macrodef>
+
+    <target name="backdown">
+         <fileset id="fs" dir="${backup.save.dir}">
+             <include name="*.zip"/>
+         </fileset>
+         <pathconvert pathsep="," property="list" refid="fs"/>
+         <echo>ZIP files found: ${list}</echo>
+         <foreach list="${list}" target="backdown0" param="file" trim="yes" />
+     </target>
+
+     <target name="backdown0">
+     	<backdown name="${file}"/>
+     </target>
+
+</project>
