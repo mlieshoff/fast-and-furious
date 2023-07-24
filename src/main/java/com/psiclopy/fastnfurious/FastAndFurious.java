@@ -1,5 +1,7 @@
 package com.psiclopy.fastnfurious;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -25,11 +27,11 @@ public class FastAndFurious {
       String backupDirectory = commandLine.getOptionValue("t");
       String[] sourceDirectories = commandLine.getOptionValue("s").split(",");
       BackupCreator backupCreator = new BackupCreator();
-      backupCreator.start(backupDirectory, sourceDirectories);
+      backupCreator.start(backupDirectory.trim(), Arrays.stream(sourceDirectories).map(s -> s.trim()).collect(Collectors.toList()));
     } catch (ParseException e) {
       printHelp();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+    } catch (Exception e) {
+      throw new IllegalStateException(e);
     }
   }
 
